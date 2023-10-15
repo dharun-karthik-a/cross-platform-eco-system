@@ -4,20 +4,26 @@ import android.app.Notification
 import android.content.pm.PackageManager
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
+import android.util.Log
+import com.app.crossecosystem.enums.ToggleManager
+import com.app.crossecosystem.enums.Toggles
 import com.app.crossecosystem.firebase.FirebaseService
 
 
 class NotificationPublisher() : NotificationListenerService() {
 
+    private val TAG = "NOTIFICATION"
     private val firebaseService = FirebaseService()
-
-
+    private lateinit var toggleManager: ToggleManager
+    override fun onCreate() {
+        super.onCreate()
+        toggleManager = ToggleManager(applicationContext)
+    }
     override fun onNotificationPosted(statusBarNotification: StatusBarNotification) {
-        if ((statusBarNotification.notification.flags and Notification.FLAG_GROUP_SUMMARY) != 0) {
-            return;
+        Log.i(TAG, "notification received for ${statusBarNotification.packageName}")
+        if (!statusBarNotification.isGroup && toggleManager.isSwitchEnabled(Toggles.NOTIFICATION_TOGGLE)) {
+            firebaseService.publishNotification(createNotificationData(statusBarNotification))
         }
-
-        firebaseService.publishNotification(createNotificationData(statusBarNotification))
     }
 
     private fun createNotificationData(statusBarNotification: StatusBarNotification): NotificationData {
@@ -39,7 +45,6 @@ class NotificationPublisher() : NotificationListenerService() {
     } catch (e: java.lang.Exception) {
         packageName
     }
-
 
 }
 

@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Cross Ecosystem</string>
+    <string name="notification_toggle_name">notification</string>
 </resources>
